@@ -1,5 +1,4 @@
 #!/bin/bash
-# scripts/normalizar.sh
 
 # Obtener la ruta absoluta del directorio donde vive este script (sec_guard/scripts)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
