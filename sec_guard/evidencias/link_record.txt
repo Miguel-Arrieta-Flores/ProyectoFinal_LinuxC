@@ -1,0 +1,16 @@
+  Fichero: pruebas/prueba_doc_nuevo.txt
+  Tamaño: 0         	Bloques: 0          Bloque E/S: 4096   fichero regular vacío
+Device: 259,7	Inode: 45371       Links: 2
+Acceso: (0664/-rw-rw-r--)  Uid: ( 1000/  miguel)   Gid: ( 1000/  miguel)
+Acceso: 2026-11-10 16:03:59.688818058 -0600
+Modificación: 2026-11-10 16:03:59.688818058 -0600
+      Cambio: 2026-11-10 16:04:59.434659786 -0600
+    Creación: 2026-11-10 16:03:59.688818058 -0600
+  Fichero: pruebas/hardlink.txt
+  Tamaño: 0         	Bloques: 0          Bloque E/S: 4096   fichero regular vacío
+Device: 259,7	Inode: 45371       Links: 2
+Acceso: (0664/-rw-rw-r--)  Uid: ( 1000/  miguel)   Gid: ( 1000/  miguel)
+Acceso: 2026-11-10 16:03:59.688818058 -0600
+Modificación: 2026-11-10 16:03:59.688818058 -0600
+      Cambio: 2026-11-10 16:04:59.434659786 -0600
+    Creación: 2026-11-10 16:03:59.688818058 -0600
