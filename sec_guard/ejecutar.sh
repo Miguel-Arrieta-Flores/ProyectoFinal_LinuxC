@@ -40,6 +40,9 @@ rm -f "$INFORME" "$MEDICIONES" \
       "$PREP_DIR/conexiones_syn.txt" \
       "$BIN_C"
 
+#En caso de eliminar capturas realizadas anteriormente
+#rm -f "$BASE_DIR/capturas/telemetria_raw.log"
+
 if [ $? -ne 0 ]; then
     echo "Error crítico: No se pudieron limpiar los archivos residuales." >&2
     exit 1
@@ -133,7 +136,9 @@ if [ ! -f "$SRC_C" ]; then
     exit 1
 fi
 
-gcc -Wall -Wextra -pedantic -std=c99 "$SRC_C" -o "$BIN_C"
+rm -f "$BIN_C"
+
+gcc "$SRC_C" -o "$BIN_C"
 if [ $? -ne 0 ]; then
     echo "Error crítico: La compilación de sec_engine.c arrojó errores. Abortando sin ejecutar." >&2
     exit 1
@@ -159,4 +164,72 @@ echo "=================================================="
 echo "          COMPLETADO EXITOSAMENTE             "
 echo "   Informe disponible en: $BASE_DIR/resultados/informe_seguridad.txt"
 echo "=================================================="
+
+#Creacion y documentacion del proceso en segundo plano
+echo "[+] Ejecutando y documentando ciclo de vida de proceso auxiliar..."
+
+ADMIN_LOG="$BASE_DIR/evidencias/pruebas/admin_process.txt"
+mkdir -p "$BASE_DIR/evidencias/pruebas"
+
+# Se inicia el proceso auxiliar de bajo impacto en segundo plano
+sleep 600 &
+AUX_PID=$!
+
+if ! ps -p "$AUX_PID" > /dev/null 2>&1; then
+    echo "Error crítico: No se pudo iniciar el proceso auxiliar en segundo plano." >&2
+    exit 1
+fi
+
+{
+    echo "=========================================================="
+    echo "   REPORTE AUTOMATIZADO DE ADMINISTRACIÓN DE PROCESOS     "
+    echo "=========================================================="
+    echo "Nombre del proceso : sleep 600"
+    echo "PID asignado       : $AUX_PID"
+    echo ""
+    echo "--- ESTADO INICIAL (Ejecución en segundo plano) ---"
+    echo "Instrucción        : sleep 600 &"
+    ps -o user,pid,ppid,stat,start,time,cmd -p "$AUX_PID"
+} > "$ADMIN_LOG"
+
+# Suspensión del proceso (SIGSTOP)
+kill -STOP "$AUX_PID"
+sleep 0.2
+{
+    echo ""
+    echo "---  SUSPENSIÓN ---"
+    echo "Señal enviada      : SIGSTOP (-STOP)"
+    echo "Instrucción        : kill -STOP $AUX_PID"
+    echo "Verificación (STAT debe ser T):"
+    ps -o user,pid,ppid,stat,start,time,cmd -p "$AUX_PID"
+} >> "$ADMIN_LOG"
+
+# Reanudación del proceso (SIGCONT)
+kill -CONT "$AUX_PID"
+sleep 0.2
+{
+    echo ""
+    echo "--- REANUDACIÓN ---"
+    echo "Señal enviada      : SIGCONT (-CONT)"
+    echo "Instrucción        : kill -CONT $AUX_PID"
+    echo "Verificación (STAT debe volver a S):"
+    ps -o user,pid,ppid,stat,start,time,cmd -p "$AUX_PID"
+} >> "$ADMIN_LOG"
+
+# Terminación del proceso (SIGTERM)
+kill -TERM "$AUX_PID"
+wait "$AUX_PID" 2>/dev/null
+{
+    echo ""
+    echo "--- TERMINACIÓN ---"
+    echo "Señal enviada      : SIGTERM (-TERM)"
+    echo "Instrucción        : kill -TERM $AUX_PID"
+    echo "Verificación de estado final:"
+    if ! ps -p "$AUX_PID" > /dev/null 2>&1; then
+        echo "Confirmado: El proceso con PID $AUX_PID finalizó correctamente y ya no figura en la tabla de procesos."
+    else
+        echo "Advertencia: El proceso aún figura activo."
+    fi
+} >> "$ADMIN_LOG"
+
 exit 0

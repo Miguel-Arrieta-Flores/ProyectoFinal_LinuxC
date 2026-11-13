@@ -14,3 +14,19 @@ Acceso: 2026-11-10 16:03:59.688818058 -0600
 Modificación: 2026-11-10 16:03:59.688818058 -0600
       Cambio: 2026-11-10 16:04:59.434659786 -0600
     Creación: 2026-11-10 16:03:59.688818058 -0600
+  Fichero: enlace_pruebas -> evidencias/pruebas/
+  Tamaño: 19        	Bloques: 0          Bloque E/S: 4096   enlace simbólico
+Device: 259,7	Inode: 45369       Links: 1
+Acceso: (0777/lrwxrwxrwx)  Uid: ( 1000/  miguel)   Gid: ( 1000/  miguel)
+Acceso: 2026-11-12 09:50:11.416599367 -0600
+Modificación: 2026-11-10 16:03:39.416193106 -0600
+      Cambio: 2026-11-10 16:03:39.416193106 -0600
+    Creación: 2026-11-10 16:03:39.416193106 -0600
+  Fichero: evidencias/pruebas/
+  Tamaño: 4096      	Bloques: 8          Bloque E/S: 4096   directorio
+Device: 259,7	Inode: 45367       Links: 2
+Acceso: (0775/drwxrwxr-x)  Uid: ( 1000/  miguel)   Gid: ( 1000/  miguel)
+Acceso: 2026-11-12 18:16:55.602481860 -0600
+Modificación: 2026-11-12 18:16:18.689864478 -0600
+      Cambio: 2026-11-12 18:16:18.689864478 -0600
+    Creación: 2026-11-10 16:03:31.784957848 -0600

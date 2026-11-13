@@ -1,17 +1,30 @@
-=== 1. INICIO DEL PROCESO EN SEGUNDO PLANO ===
-Comando: sleep 600 &
-PID asignado: 8531
-USER         PID    PPID STAT  STARTED     TIME CMD
-miguel      8531    6841 S    18:16:05 00:00:00 sleep 600
+==========================================================
+   REPORTE AUTOMATIZADO DE ADMINISTRACIÓN DE PROCESOS     
+==========================================================
+Nombre del proceso : sleep 600
+PID asignado       : 19897
 
-=== 2. SUSPENSIÓN DEL PROCESO (kill -STOP 8531) ===
+--- ESTADO INICIAL (Ejecución en segundo plano) ---
+Instrucción        : sleep 600 &
 USER         PID    PPID STAT  STARTED     TIME CMD
-miguel      8531    6841 T    18:16:05 00:00:00 sleep 600
+miguel     19897   19843 S+   20:48:24 00:00:00 sleep 600
 
-=== 3. REANUDACIÓN DEL PROCESO (kill -CONT 8531) ===
+---  SUSPENSIÓN ---
+Señal enviada      : SIGSTOP (-STOP)
+Instrucción        : kill -STOP 19897
+Verificación (STAT debe ser T):
 USER         PID    PPID STAT  STARTED     TIME CMD
-miguel      8531    6841 S    18:16:05 00:00:00 sleep 600
+miguel     19897   19843 T+   20:48:24 00:00:00 sleep 600
 
-=== 4. TERMINACIÓN CONTROLADA (kill -TERM 8531) ===
-    PID TTY          TIME CMD
-Verificación: El proceso con PID 8531 ya no existe en la tabla de procesos.
+--- REANUDACIÓN ---
+Señal enviada      : SIGCONT (-CONT)
+Instrucción        : kill -CONT 19897
+Verificación (STAT debe volver a S):
+USER         PID    PPID STAT  STARTED     TIME CMD
+miguel     19897   19843 S+   20:48:24 00:00:00 sleep 600
+
+--- TERMINACIÓN ---
+Señal enviada      : SIGTERM (-TERM)
+Instrucción        : kill -TERM 19897
+Verificación de estado final:
+Confirmado: El proceso con PID 19897 finalizó correctamente y ya no figura en la tabla de procesos.
