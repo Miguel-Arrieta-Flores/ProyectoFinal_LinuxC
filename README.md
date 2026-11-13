@@ -90,53 +90,68 @@ Este comando realiza automáticamente: limpieza preventiva, validación y extrac
 ## 💡 Respuestas a las preguntas de Cada Etapa
 ### Etapa 1
 
-* **¿Por qué los permisos adecuados para un directorio pueden ser distintos de los de un archivo?**
-En un directorio, el permiso x (ejecución) permite atravesarlo y acceder a sus inodos. En un archivo de datos, x no es necesario y representa un riesgo de seguridad al permitir su ejecución como binario.
+* **¿Por qué los permisos adecuados para un directorio pueden ser distintos de los necesarios para un archivo de datos?**
+
+Los permisos varían porque en un **directorio** el bit de ejecución (`x`) es indispensable para que el sistema operativo permita atravesarlo, acceder a sus inodos y consultar los archivos internos, mientras que en un **archivo de datos** ese mismo permiso es innecesario y representa un riesgo de seguridad al habilitar su ejecución como código. Por ello, los archivos de datos se limitan a lectura (`r`) o escritura (`w`) según el rol del usuario (propietario, grupo u otros), restringiendo a terceros a solo consulta para proteger su integridad.
 
 * **¿Qué diferencia existe entre el archivo original y su enlace duro?**
+
 Ninguna a nivel de sistema de archivos; ambos son entradas de directorio independientes que apuntan al mismo número de inodo y comparten bloques de datos en disco.
 
-* **¿Cuál es la utilidad de establecer enlaces simbólicos en el desarrollo?**
+* **¿Cuál es la utilidad de establecer enlaces simbólicos en el desarrollo de un sistema?**
+
 Crean accesos directos o abstracciones de rutas dinámicas a archivos/directorios sin duplicar datos ni alterar la estructura original.
 
 * **¿Qué información de los metadatos permite reconocer cambios en un archivo?**
+
 El tamaño, las marcas de tiempo (mtime para modificación de contenido, ctime para cambios de inodo/permisos) y el código de verificación o inodo.
 
 ### Etapa 2
 
-* **¿Qué transformación necesita la salida de cada utilería para convertirse en un registro normalizado?**
+* **¿Qué transformación necesita la salida de cada utilería para convertirse en un registro del archivo normalizado?**
+
 Filtrar encabezados y texto secundario con awk/sed para aislar únicamente el valor entero numérico y concatenarle su etiqueta de categoría (DISCO, PROCESOS, PERMISOS).
 
 * **¿Por qué un valor cero puede ser válido y no debe confundirse con una captura fallida?**
+
 Porque 0 representa un estado real del sistema (ej. 0 archivos con permisos inseguros). Una captura fallida se distingue por un código de salida distinto de cero ($? != 0) o por una salida nula en la utilería.
 
 * **¿Cómo comprobarán que la cantidad del encabezado corresponde a los registros conservados?**
+
 Contando las líneas del cuerpo del archivo con grep -c o awk y comparando dinámicamente ese entero contra el valor declarado en la línea 2 de mediciones_sec.txt.
 
-* **¿Por qué el orden de sed es determinante al habilitar directivas y eliminar comentarios?**
+* **¿Por qué el orden de las instrucciones dentro del flujo de sed es estrictamente determinante al habilitar directivas y eliminar comentarios?**
+
 Porque si se eliminan los comentarios primero (/^\s*#/d), las directivas comentadas que debían ser modificadas o habilitadas se perderían antes de poder ser procesadas.
 
-* **¿Qué estrategia se empleó para aislar el puerto sin limitar los cuatro octetos de la IP?**
+* **¿Qué estrategia se empleó para aislar el puerto sin limitar obtener correctamente los cuatro octetos de la IP?**
+
 Utilizar expresiones regulares con delimitadores de campo (tratar los dos puntos : como separadores) para aislar limpiamente los campos de dirección IP y puerto.
 
 ### Etapa 3
 
 * **¿Qué diferencia existe entre almacenar una medición y almacenar el resumen de una categoría?**
+
 Una medición almacena un evento individual en memoria (categoría y valor). El resumen es una estructura agregada que consolida métricas acumuladas (suma, min, max, promedio, alertas).
 
-* **¿Cómo evitarán una división entre cero o utilizar un mínimo no inicializado?**
+* **¿Cómo evitarán una división entre cero o utilizar un mínimo que todavía no se ha inicializado?**
+
 Evaluando si cantidad > 0 antes de calcular el promedio, e inicializando los valores minimo y maximo directamente con el valor del primer registro válido procesado.
 
-* **Si ocurre un error después de reservar memoria y abrir un archivo, ¿qué recursos deben liberarse?**
+* **Si ocurre un error después de reservar memoria y abrir un archivo, ¿qué recursosvbdeben liberar o cerrar?**
+
 Se debe cerrar el descriptor de archivo con fclose() y liberar los bloques de memoria dinámica asignados con free().
 
 ### Etapa 4
 
 * **¿Cómo decide el script si puede continuar después de ejecutar el programa C?**
+
 Verificando el código de salida devuelto por el proceso hijo mediante la condición $? -eq 0 o el mecanismo de interrupción automática set -e.
 
 * **¿Cómo se distinguirá un informe nuevo de uno conservado de una ejecución anterior?**
+
 Mediante la eliminación preventiva del archivo informe al inicio del script orquestador y la inclusión de marcas de tiempo en el flujo de ejecución.
 
-* **¿Qué evidencia demuestra que el informe se obtuvo mediante el flujo completo y no manualmente?**
+* **¿Qué evidencia demuestra que el informe se obtuvo mediante el flujo completo y no se elaboró manualmente?**
+
 La coherencia exacta de inodos, la actualización de marcas de tiempo en preparados/mediciones_sec.txt y los registros paso a paso en la salida estándar durante la ejecución del script orquestador.
