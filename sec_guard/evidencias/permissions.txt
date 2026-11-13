@@ -1,0 +1,49 @@
+================================================================================
+AUDITORÍA Y DIRECTRIZ DE PERMISOS DEL SISTEMA - PROYECTO SECGUARD
+================================================================================
+
+1. ESQUEMA DE PERMISOS IMPLEMENTADO (PRINCIPIO DE MÍNIMO PRIVILEGIO)
+--------------------------------------------------------------------------------
+- Directorios:                775 (rwxrwxr-x)
+- Scripts y binarios (.sh):   755 (rwxr-xr-x)
+- Archivos de datos y logs:   644 (rw-r--r--)
+
+2. JUSTIFICACIÓN TÉCNICA DE SEGURIDAD
+--------------------------------------------------------------------------------
+* Directorios (775 - rwxrwxr-x):
+  El bit de ejecución (x) en directorios es indispensable para atravesarlos y
+  acceder a sus inodos. Otorgar 775 permite que tanto el propietario como los
+  integrantes del grupo de auditoría naveguen y generen archivos de captura o
+  reportes sin bloqueos operativos, mientras que terceros quedan restringidos a
+  solo lectura y tránsito (r-x) sin capacidad de crear ni borrar archivos.
+
+* Scripts y Ejecutables (755 - rwxr-xr-x):
+  Permite que cualquier usuario o tarea automatizada autorizada pueda leer y
+  ejecutar la auditoría (r-x), pero restringe el permiso de escritura (w)
+  exclusivamente al propietario. Esto previene que terceros o miembros del grupo
+  alteren la lógica de validación o inyecten código malicioso.
+
+* Archivos de Datos, Código Fuente y Reportes (644 - rw-r--r--):
+  Los archivos de texto plano (.txt, .log, .c) no son programas; omitir el bit
+  de ejecución (x) elimina el riesgo de que sean interpretados o ejecutados
+  como código. Al asignar lectura y escritura (rw-) únicamente al propietario y
+  solo lectura (r--) al grupo y a otros, se garantiza la integridad e
+  inmutabilidad de las bitácoras y el informe final tras su generación.
+
+3. IMPACTO EN LA TELEMETRÍA DE SEGURIDAD (capturar.sh)
+--------------------------------------------------------------------------------
+Bajo esta directriz, ningún archivo regular cuenta con permisos de escritura
+para el grupo (-perm -020) ni para otros (-perm -002). Esto mantiene la métrica
+de riesgo PERMISOS en 0 bajo condiciones normales y dispara una alerta inmediata
+si algún archivo queda expuesto de forma insegura.
+
+4. COMANDOS DE APLICACIÓN Y VERIFICACIÓN
+--------------------------------------------------------------------------------
+# Aplicar directriz recursivamente desde la raíz sec_guard/:
+find . -type d -exec chmod 775 {} +
+find . -type f ! -name "*.sh" ! -name "sec_engine" -exec chmod 644 {} +
+find . -type f \( -name "*.sh" -o -name "sec_engine" \) -exec chmod 755 {} +
+
+# Verificar que no existan archivos con escritura para grupo u otros (salida vacía):
+find . -type f \( -perm -020 -o -perm -002 \)
+================================================================================

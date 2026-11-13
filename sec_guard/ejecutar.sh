@@ -232,4 +232,9 @@ wait "$AUX_PID" 2>/dev/null
     fi
 } >> "$ADMIN_LOG"
 
+# Aplicar directriz de permisos final: 775 directorios, 755 scripts/binario, 744 datos
+find "$BASE_DIR" -type d -exec chmod 775 {} +
+find "$BASE_DIR" -type f ! -name "*.sh" ! -name "sec_engine" -exec chmod 644 {} +
+find "$BASE_DIR" -type f \( -name "*.sh" -o -name "sec_engine" \) -exec chmod 755 {} +
+
 exit 0
