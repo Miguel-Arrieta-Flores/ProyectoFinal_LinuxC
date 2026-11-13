@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
     }
 
     fprintf(fout, "INFORME DE MONITOREO\n");
-    fprintf(fout, "Etiqueta: %s Registros: %d\n", etiqueta, cantidad_declarada);
+    fprintf(fout, "Etiqueta: %s\nRegistros: %d\n", etiqueta, cantidad_declarada);
     fprintf(fout, "-----------------------------------------\n");
 
     escribir_bloque_informe(fout, "DISCO", &st_disco);

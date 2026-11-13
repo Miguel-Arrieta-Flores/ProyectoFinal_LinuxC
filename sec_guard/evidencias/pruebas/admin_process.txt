@@ -1,0 +1,17 @@
+=== 1. INICIO DEL PROCESO EN SEGUNDO PLANO ===
+Comando: sleep 600 &
+PID asignado: 8531
+USER         PID    PPID STAT  STARTED     TIME CMD
+miguel      8531    6841 S    18:16:05 00:00:00 sleep 600
+
+=== 2. SUSPENSIÓN DEL PROCESO (kill -STOP 8531) ===
+USER         PID    PPID STAT  STARTED     TIME CMD
+miguel      8531    6841 T    18:16:05 00:00:00 sleep 600
+
+=== 3. REANUDACIÓN DEL PROCESO (kill -CONT 8531) ===
+USER         PID    PPID STAT  STARTED     TIME CMD
+miguel      8531    6841 S    18:16:05 00:00:00 sleep 600
+
+=== 4. TERMINACIÓN CONTROLADA (kill -TERM 8531) ===
+    PID TTY          TIME CMD
+Verificación: El proceso con PID 8531 ya no existe en la tabla de procesos.
