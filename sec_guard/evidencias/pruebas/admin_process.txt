@@ -2,29 +2,29 @@
    REPORTE AUTOMATIZADO DE ADMINISTRACIÓN DE PROCESOS     
 ==========================================================
 Nombre del proceso : sleep 600
-PID asignado       : 19897
+PID asignado       : 3584
 
 --- ESTADO INICIAL (Ejecución en segundo plano) ---
 Instrucción        : sleep 600 &
 USER         PID    PPID STAT  STARTED     TIME CMD
-miguel     19897   19843 S+   20:48:24 00:00:00 sleep 600
+miguel      3584    3533 S+   12:02:50 00:00:00 sleep 600
 
 ---  SUSPENSIÓN ---
 Señal enviada      : SIGSTOP (-STOP)
-Instrucción        : kill -STOP 19897
+Instrucción        : kill -STOP 3584
 Verificación (STAT debe ser T):
 USER         PID    PPID STAT  STARTED     TIME CMD
-miguel     19897   19843 T+   20:48:24 00:00:00 sleep 600
+miguel      3584    3533 T+   12:02:50 00:00:00 sleep 600
 
 --- REANUDACIÓN ---
 Señal enviada      : SIGCONT (-CONT)
-Instrucción        : kill -CONT 19897
+Instrucción        : kill -CONT 3584
 Verificación (STAT debe volver a S):
 USER         PID    PPID STAT  STARTED     TIME CMD
-miguel     19897   19843 S+   20:48:24 00:00:00 sleep 600
+miguel      3584    3533 S+   12:02:50 00:00:00 sleep 600
 
 --- TERMINACIÓN ---
 Señal enviada      : SIGTERM (-TERM)
-Instrucción        : kill -TERM 19897
+Instrucción        : kill -TERM 3584
 Verificación de estado final:
-Confirmado: El proceso con PID 19897 finalizó correctamente y ya no figura en la tabla de procesos.
+Confirmado: El proceso con PID 3584 finalizó correctamente y ya no figura en la tabla de procesos.

@@ -138,7 +138,7 @@ fi
 
 rm -f "$BIN_C"
 
-gcc "$SRC_C" -o "$BIN_C"
+gcc -Wall -Wextra -Werror -pedantic -std=c99 "$SRC_C" -o "$BIN_C"
 if [ $? -ne 0 ]; then
     echo "Error crítico: La compilación de sec_engine.c arrojó errores. Abortando sin ejecutar." >&2
     exit 1
