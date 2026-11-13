@@ -87,26 +87,56 @@ Este comando realiza automáticamente: limpieza preventiva, validación y extrac
 
 ---
 
-## 💡 Respuestas Breves a las Preguntas de Cada Etapa
+## 💡 Respuestas a las preguntas de Cada Etapa
+### Etapa 1
 
-### Etapa 1: Arquitectura, Enlaces e Inodos
-* **¿Qué diferencia existe a nivel de inodo y persistencia entre un enlace duro (*hard link*) y un enlace simbólico (*soft link*)?**
-  Un enlace duro apunta directamente al mismo número de inodo y bloques de datos en disco que el archivo original; si el archivo original se borra o mueve dentro de la misma partición, los datos siguen accesibles. En cambio, un enlace simbólico posee su propio inodo y almacena únicamente la ruta textual hacia el destino; si el objetivo original se elimina o cambia de ubicación, el enlace simbólico queda roto (*dangling link*).
+* **¿Por qué los permisos adecuados para un directorio pueden ser distintos de los de un archivo?
+En un directorio, el permiso x (ejecución) permite atravesarlo y acceder a sus inodos. En un archivo de datos, x no es necesario y representa un riesgo de seguridad al permitir su ejecución como binario.
 
-### Etapa 2: Extracción y Normalización de Logs
-* **¿Por qué se utiliza `tar -tzf` antes de descomprimir `paquete_auditoria.tar.gz`?**
-  Permite inspeccionar y validar la integridad estructural del archivo comprimido sin extraer nada en disco, evitando sobreescribir o corromper archivos existentes si el paquete está dañado.
-* **¿Cómo se separan las direcciones IP (IPv4 e IPv6) de sus puertos en `net_traffic.log` sin alterar los octetos internos?**
-  Mediante `sed -E 's/\.([0-9]+)( >|:)/:\1\2/g'`, que identifica exclusivamente el último punto seguido de dígitos justo antes de los delimitadores de dirección (` >` o `:`) y lo reemplaza por dos puntos (`:`), preservando intactos tanto los cuatro octetos IPv4 como los bloques hexadecimales IPv6.
+* **¿Qué diferencia existe entre el archivo original y su enlace duro?
+Ninguna a nivel de sistema de archivos; ambos son entradas de directorio independientes que apuntan al mismo número de inodo y comparten bloques de datos en disco.
 
-### Etapa 3: Telemetría, Permisos y Motor en C
-* **¿Por qué `find` agrupa `-perm -020 -o -perm -002` entre paréntesis escapados `\( ... \)`?**
-  Para evaluar ambas condiciones de permisos (escritura para grupo `020` **o** escritura para otros `002`) sobre cada archivo regular (`-type f`) como una sola unidad lógica, garantizando que un archivo con ambos permisos activos se contabilice una sola vez.
-* **¿Por qué se pasan las estructuras por referencia (`&st_disco`) hacia las funciones en C?**
-  Para pasar la dirección de memoria real de la estructura (`StatsCategoria *`) en lugar de una copia por valor, permitiendo modificar directamente sus acumuladores internos (`suma`, `conteo`, `alertas`) mediante el operador flecha (`->`) y optimizando el uso de memoria.
+* **¿Cuál es la utilidad de establecer enlaces simbólicos en el desarrollo?
+Crean accesos directos o abstracciones de rutas dinámicas a archivos/directorios sin duplicar datos ni alterar la estructura original.
 
-### Etapa 4: Orquestación, Tolerancia a Fallos y Procesos
-* **¿Cómo garantiza el orquestador que no se generen falsos positivos tras un error de permisos o compilación?**
-  Al inicio de cada corrida ejecuta una limpieza preventiva (`rm -f`) que elimina informes previos, archivos preparados y el binario compilado `fuentes/sec_engine`. Posteriormente valida cada paso (`if [ ! -x ... ]`, `if ! gcc ...`) abortando con `exit 1` ante cualquier fallo, lo que impide que sobrevivan resultados o ejecutables de ejecuciones anteriores.
-* **¿Qué estados atraviesa el proceso auxiliar en segundo plano durante la prueba de señales?**
-  Al lanzarse en segundo plano (`sleep 600 &`) inicia en estado **`S`** (*Interruptible Sleep*); al recibir `SIGSTOP` pasa a estado **`T`** (*Stopped*); al recibir `SIGCONT` reanuda su ejecución volviendo a **`S`**; y finalmente con `SIGTERM` libera sus recursos y desaparece de la tabla de procesos.
+* **¿Qué información de los metadatos permite reconocer cambios en un archivo?
+El tamaño, las marcas de tiempo (mtime para modificación de contenido, ctime para cambios de inodo/permisos) y el código de verificación o inodo.
+
+### Etapa 2
+
+* **¿Qué transformación necesita la salida de cada utilería para convertirse en un registro normalizado?
+Filtrar encabezados y texto secundario con awk/sed para aislar únicamente el valor entero numérico y concatenarle su etiqueta de categoría (DISCO, PROCESOS, PERMISOS).
+
+* **¿Por qué un valor cero puede ser válido y no debe confundirse con una captura fallida?
+Porque 0 representa un estado real del sistema (ej. 0 archivos con permisos inseguros). Una captura fallida se distingue por un código de salida distinto de cero ($? != 0) o por una salida nula en la utilería.
+
+* **¿Cómo comprobarán que la cantidad del encabezado corresponde a los registros conservados?
+Contando las líneas del cuerpo del archivo con grep -c o awk y comparando dinámicamente ese entero contra el valor declarado en la línea 2 de mediciones_sec.txt.
+
+* **¿Por qué el orden de sed es determinante al habilitar directivas y eliminar comentarios?
+Porque si se eliminan los comentarios primero (/^\s*#/d), las directivas comentadas que debían ser modificadas o habilitadas se perderían antes de poder ser procesadas.
+
+* **¿Qué estrategia se empleó para aislar el puerto sin limitar los cuatro octetos de la IP?
+Utilizar expresiones regulares con delimitadores de campo (tratar los dos puntos : como separadores) para aislar limpiamente los campos de dirección IP y puerto.
+
+### Etapa 3
+
+* **¿Qué diferencia existe entre almacenar una medición y almacenar el resumen de una categoría?
+Una medición almacena un evento individual en memoria (categoría y valor). El resumen es una estructura agregada que consolida métricas acumuladas (suma, min, max, promedio, alertas).
+
+* **¿Cómo evitarán una división entre cero o utilizar un mínimo no inicializado?
+Evaluando si cantidad > 0 antes de calcular el promedio, e inicializando los valores minimo y maximo directamente con el valor del primer registro válido procesado.
+
+* **Si ocurre un error después de reservar memoria y abrir un archivo, ¿qué recursos deben liberarse?
+Se debe cerrar el descriptor de archivo con fclose() y liberar los bloques de memoria dinámica asignados con free().
+
+### Etapa 4
+
+* **¿Cómo decide el script si puede continuar después de ejecutar el programa C?
+Verificando el código de salida devuelto por el proceso hijo mediante la condición $? -eq 0 o el mecanismo de interrupción automática set -e.
+
+* **¿Cómo se distinguirá un informe nuevo de uno conservado de una ejecución anterior?
+Mediante la eliminación preventiva del archivo informe al inicio del script orquestador y la inclusión de marcas de tiempo en el flujo de ejecución.
+
+* **¿Qué evidencia demuestra que el informe se obtuvo mediante el flujo completo y no manualmente?
+La coherencia exacta de inodos, la actualización de marcas de tiempo en preparados/mediciones_sec.txt y los registros paso a paso en la salida estándar durante la ejecución del script orquestador.
